@@ -59,7 +59,7 @@ export default function LoginPage() {
             console.error("Login Error:", err);
 
             // Demo Fallback for Admin
-            if (loginMode === 'admin' && email === "admin@sinhgad.edu" && password === "Admin@123") {
+            if (loginMode === 'admin' && email === "admin@dtu.ac.in" && password === "Admin@123") {
                 toast.success("Login Successful (Demo Admin)!");
                 login({ name: "Admin User", email: email, role: "admin", profileImage: "" } as any);
             }
@@ -90,21 +90,21 @@ export default function LoginPage() {
             <div className="md:w-[35%] bg-[#8B1A1A] text-white p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
                 {/* Logo Placeholder */}
                 <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mb-6 shadow-lg text-center p-2">
-                    <span className="text-[#1A365D] text-2xl font-bold leading-none">SCOE PUNE</span>
+                    <span className="text-[#1A365D] text-2xl font-bold leading-none">SPCET PUNE</span>
                 </div>
 
-                <p className="uppercase tracking-widest text-sm mb-2 opacity-80">Sinhgad Technical Education Society&apos;s</p>
+                <p className="uppercase tracking-widest text-sm mb-2 opacity-80">Shri Someshwar Shikshan Prasarak Mandal's</p>
                 <h1 className="text-3xl font-bold mb-4 leading-tight">
-                    Sinhgad College Of <br /> Engineering, Pune
+                    Sharadchandra Pawar College of <br /> Engineering & Technology
                 </h1>
                 <p className="text-sm opacity-80 mb-6 max-w-sm">
-                    S. No. 44/1, Vadgaon (Bk), Off Sinhgad Road, Pune - 411041
+                    Someshwarnagar, Tal - Baramati, Dist- Pune 412306
                 </p>
 
                 <div className="text-xs space-y-1 opacity-70 border-t border-white/20 pt-6 mt-2 w-full max-w-xs">
-                    <p>Approved by AICTE New Delhi, Affiliated to Savitribai Phule Pune University (SPPU)</p>
-                    <p>Recognised by Govt. of Maharashtra, DTE Mumbai.</p>
-                    <p className="font-semibold text-yellow-300">DTE Code 6177 | NAAC : A+ Grade | NBA Accredited | ISO 9001: 2015</p>
+                    <p>Approved by AICTE New Delhi, Recognized by Govt. of Maharashtra & Affiliated to University of Pune</p>
+                    <p>Id.no.PU/PN.Engg./445/2012</p>
+                    <p className="font-semibold text-yellow-300"></p>
                 </div>
             </div>
 
@@ -146,7 +146,7 @@ export default function LoginPage() {
                                 </label>
                                 <input
                                     type="email"
-                                    placeholder={loginMode === 'admin' ? "admin@sinhgad.edu" : "student@example.com"}
+                                    placeholder={loginMode === 'admin' ? "admin@dtu.ac.in" : "student@example.com"}
                                     className="input input-bordered w-full bg-gray-50 focus:border-teal-500 focus:bg-white transition-colors"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}

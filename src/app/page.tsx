@@ -38,10 +38,10 @@ export default function Home() {
             <div className="bg-[#8B1A1A] text-white py-2 px-6 text-sm flex flex-col md:flex-row justify-between items-center z-50 relative">
                 <div className="flex gap-4">
                     <span className="flex items-center gap-1 hover:text-yellow-300 transition-colors cursor-pointer">
-                        <IconPhone size={14} /> 020-24354705
+                        <IconPhone size={14} /> (02112) 283185
                     </span>
                     <span className="flex items-center gap-1 hover:text-yellow-300 transition-colors cursor-pointer">
-                        <IconMail size={14} /> principal.scoe@sinhgad.edu
+                        <IconMail size={14} /> sspm1972@gmail.com
                     </span>
                 </div>
                 <div className="flex gap-4 mt-2 md:mt-0 opacity-80 text-xs uppercase tracking-wide">
@@ -57,11 +57,11 @@ export default function Home() {
                     {/* Logo Section */}
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-[#8B1A1A] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
-                            SCOE
+                            SPCET
                         </div>
                         <div className="leading-tight">
-                            <h1 className="text-xl font-bold text-[#1A365D] uppercase tracking-tight">Sinhgad College Of Engineering</h1>
-                            <p className="text-xs text-gray-500 font-medium tracking-widest">NTC, Pune</p>
+                            <h1 className="text-xl font-bold text-[#1A365D] uppercase tracking-tight">Sharadchandra Pawar College of Engineering & Technology</h1>
+                            <p className="text-xs text-gray-500 font-medium tracking-widest">Baramati, Pune</p>
                         </div>
                     </div>
 
@@ -116,7 +116,7 @@ export default function Home() {
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0 select-none pointer-events-none">
                     <div
-                        className="w-full h-full bg-gradient-to-br from-[#1A365D] via-[#2A4365] to-[#8B1A1A] animate-gradient-slow"
+                        className="w-full h-full bg-cover bg-center" style={{ backgroundImage: "url('/spcet_campus.png')" }}
                     ></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
                 </div>
@@ -130,7 +130,7 @@ export default function Home() {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">Engineering Education</span>
                     </h1>
                     <p className="text-lg text-gray-300 max-w-xl mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                        Transforming students into industry-ready professionals through innovation, research, and holistic development at Sinhgad College Of Engineering.
+                        Transforming students into industry-ready professionals through innovation, research, and holistic development at Sharadchandra Pawar College of Engineering & Technology.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
@@ -231,7 +231,7 @@ export default function Home() {
                             </div>
                             <div className="mt-4">
                                 <h3 className="text-xl font-bold text-gray-800">Dr. S. D. Lokhande</h3>
-                                <p className="text-[#1A365D] font-semibold">Principal, SCOE</p>
+                                <p className="text-[#1A365D] font-semibold">Principal, SPCET</p>
                                 <div className="flex gap-2 mt-2">
                                     <div className="w-8 h-8 bg-black text-white flex items-center justify-center text-xs">f</div>
                                     <div className="w-8 h-8 bg-black text-white flex items-center justify-center text-xs">in</div>
@@ -244,7 +244,7 @@ export default function Home() {
                         <div className="md:w-2/3 text-gray-600 leading-relaxed text-lg space-y-6 text-justify">
                             <p className="font-semibold text-gray-800">Dear Stakeholders, <br /> Greetings!</p>
                             <p>
-                                At SCOE, we are committed to produce not only good engineers but good human beings, also. Our mission is the Holistic development of students and teachers in what we believe in and work for. We strive to achieve this by imbibing a unique value system, transparent work culture, excellent academic and physical environment conducive to learning, creativity and technology transfer. Our mandate is to generate, preserve and share knowledge for developing a vibrant society.
+                                At SPCET, we are committed to produce not only good engineers but good human beings, also. Our mission is the Holistic development of students and teachers in what we believe in and work for. We strive to achieve this by imbibing a unique value system, transparent work culture, excellent academic and physical environment conducive to learning, creativity and technology transfer. Our mandate is to generate, preserve and share knowledge for developing a vibrant society.
                             </p>
                             <p>
                                 We believe that education is a collaborative journey. The trust and support of our stakeholders inspire us to continuously evolve, adopt the best educational practices, strengthen our research initiatives, and build strong industry-academia linkages. Together, we work towards shaping not just engineers, but responsible citizens and future leaders who will drive global progress.
@@ -258,7 +258,7 @@ export default function Home() {
             <footer className="bg-[#1a1a1a] text-white pt-16 pb-8 border-t-4 border-yellow-500">
                 <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 mb-12">
                     <div className="col-span-1 md:col-span-2">
-                        <h4 className="text-2xl font-bold mb-6">Sinhgad College Of Engineering</h4>
+                        <h4 className="text-2xl font-bold mb-6">Sharadchandra Pawar College of Engineering & Technology</h4>
                         <p className="text-gray-400 leading-relaxed mb-6 max-w-sm">
                             Established with a vision to provide world-class technical education. We strive to create future leaders who contribute to society through innovation.
                         </p>
@@ -286,22 +286,22 @@ export default function Home() {
                         <ul className="space-y-4 text-gray-400">
                             <li className="flex gap-3">
                                 <IconMapPin className="shrink-0 text-[#8B1A1A]" />
-                                S. No. 44/1, Vadgaon (Bk), Off Sinhgad Road, Pune - 411041. Landmark: Vadgaon Campus.
+                                Someshwarnagar, Tal - Baramati, Dist - Pune 412306
                             </li>
                             <li className="flex gap-3">
                                 <IconPhone className="shrink-0 text-[#8B1A1A]" />
-                                020-24354705
+                                (02112) 283185
                             </li>
                             <li className="flex gap-3">
                                 <IconMail className="shrink-0 text-[#8B1A1A]" />
-                                principal.scoe@sinhgad.edu
+                                sspm1972@gmail.com
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-                    <p>© 2026 Sinhgad College Of Engineering. All Rights Reserved.</p>
+                    <p>© 2026 Sharadchandra Pawar College of Engineering & Technology. All Rights Reserved.</p>
                     <p>Vidya Rakshak System by <span className="text-white">Smart Coders</span></p>
                 </div>
             </footer>

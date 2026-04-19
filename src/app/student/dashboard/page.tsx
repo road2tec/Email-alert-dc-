@@ -221,7 +221,8 @@ export default function StudentDashboardPage() {
                                 <thead className="bg-base-200">
                                     <tr>
                                         <th>Date</th>
-                                        <th>Time</th>
+                                        <th>Entry Time</th>
+                                        <th>Exit Time</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -236,7 +237,8 @@ export default function StudentDashboardPage() {
                                             .map((record: any, idx: number) => (
                                                 <tr key={idx} className="hover:bg-base-50">
                                                     <td className="font-medium">{record.date}</td>
-                                                    <td className="font-mono text-sm">{record.time || "N/A"}</td>
+                                                    <td className="font-mono text-sm text-teal-600 font-bold">{record.entryTime || record.time || "N/A"}</td>
+                                                    <td className="font-mono text-sm text-rose-500 font-bold">{record.exitTime || "--:--"}</td>
                                                     <td><span className="badge badge-success badge-sm gap-1"><IconCheck size={12} /> Present</span></td>
                                                 </tr>
                                             ))

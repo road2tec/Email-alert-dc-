@@ -1,5 +1,5 @@
 
-// Graph Data Structure for Sinhgad College Of Engineering
+// Graph Data Structure for Sharadchandra Pawar College of Engineering & Technology
 export type NodeId =
     | "MAIN_GATE" | "ADMIN_BUILDING" | "LIBRARY" | "CANTEEN"
     | "COMP_IT_DEPT" | "ENTC_DEPT" | "MECH_CIVIL_DEPT"

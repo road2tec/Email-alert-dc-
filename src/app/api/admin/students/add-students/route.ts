@@ -75,7 +75,7 @@ export async function sendEmail(data: {
       registrationNumber: data.registrationNumber,
       email: data.email,
     });
-    await mailSender(data.email, "Welcome to JSPM's ERP", html);
+    await mailSender(data.email, "Welcome to SPCET's ERP", html);
   } catch (error) {
     console.log("Error Occured While Sending Email", error);
   }

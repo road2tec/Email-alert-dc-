@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const data = {
       id: "admin_id",
-      name: "JSPM NTC Admin",
+      name: "SPCET Admin",
       email: process.env.ADMIN_EMAIL,
       role: "admin",
       profileImage:

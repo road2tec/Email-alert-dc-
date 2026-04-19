@@ -1,6 +1,6 @@
-# SCOE - AI-Powered Attendance System 🎓🛡️
+# SPCET - AI-Powered Attendance System 🎓🛡️
 
-**Sinhgad College Of Engineering - Attendance Management System** is a modern, AI-driven platform designed for automated student tracking. It utilizes face recognition technology (MediaPipe) to provide seamless attendance and real-time monitoring.
+**Sharadchandra Pawar College of Engineering & Technology - Attendance Management System** is a modern, AI-driven platform designed for automated student tracking. It utilizes face recognition technology (MediaPipe) to provide seamless attendance and real-time monitoring.
 
 ## 🚀 Features
 - **Face Recognition Attendance**: Automated marking via webcam (Optimized Threshold: 0.45).
@@ -43,11 +43,11 @@ npm run dev
 
 ## 🔒 Default Credentials
 Access the Admin Dashboard using:
-- **Email**: `admin@jspmntc.edu.in`
+- **Email**: `admin@dtu.ac.in`
 - **Password**: `Admin@123`
 
 ## ⚙️ Configuration
 The system uses an `.env` file. Ensure `MONGO_URI` is correctly set. The API is configured to use `127.0.0.1:8001` for maximum compatibility on Windows.
 
 ---
-Developed for **Sinhgad College Of Engineering, Pune**.
+Developed for **Sharadchandra Pawar College of Engineering & Technology, Delhi**.

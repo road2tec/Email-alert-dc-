@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>VidyaRakshak | Sinhgad College Of Engineering, Pune</title>
+        <title>VidyaRakshak | Sharadchandra Pawar College of Engineering & Technology, Delhi</title>
         <meta
           name="description"
           content="VidyaRakshak is a real-time smart campus surveillance and guidance system that uses AI and computer vision to track student movements, prevent class bunking, and ensure campus-wide security. It offers voice-guided directions and alert systems for enhanced campus management."

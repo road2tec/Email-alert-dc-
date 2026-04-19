@@ -60,16 +60,16 @@ export default function HomePage() {
       {/* Left Panel (3 columns) */}
       <div className="col-span-12 md:col-span-4 bg-[#a12421] text-white p-8 hidden md:flex flex-col justify-center items-center">
         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 border border-white/30 text-3xl font-bold">
-          SCOE
+          SPCET
         </div>
         <span className="text-2xl font-extralight text-center">
-          Sinhgad Technical Education Society's
+          Shri Someshwar Shikshan Prasarak Mandal's
         </span>
         <h1 className="text-4xl font-bold mt-4 text-center text-shadow-lg uppercase">
-          Sinhgad College Of Engineering, Pune
+          Sharadchandra Pawar College of Engineering & Technology, Delhi
         </h1>
         <p className="mt-2 text-center text-lg">
-          S. No. 44/1, Vadgaon (Bk), Off Sinhgad Road, Pune - 411041
+          Someshwarnagar, Tal - Baramati, Dist- Pune 412306
           <br />
           <span className="mt-2 text-center text-base">
             <strong>
@@ -78,7 +78,7 @@ export default function HomePage() {
             </strong>
             <br />
             <strong>
-              Recognised by Govt. of Maharashtra, DTE Mumbai. DTE Code
+              Id.no.PU/PN.Engg./445/2012 DTE Code
               6177, NAAC : A+ Grade, ISO 9001: 2015
             </strong>
           </span>
@@ -89,13 +89,13 @@ export default function HomePage() {
       <div
         className="col-span-12 md:col-span-8 flex justify-center items-center p-8"
         style={{
-          background: 'linear-gradient(135deg, #1A365D 0%, #8B1A1A 100%)',
+          backgroundImage: "url('/spcet_campus.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
         <div className="bg-base-100 rounded-2xl bg-opacity-80 p-8 shadow-md w-full max-w-sm border border-t-2 border-primary text-base-content">
-          <div className="w-16 h-16 bg-[#8B1A1A] rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 lg:hidden mx-auto">SCOE</div>
+          <div className="w-16 h-16 bg-[#8B1A1A] rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 lg:hidden mx-auto">SPCET</div>
           <h2 className="text-2xl font-semibold mb-6 text-center">
             Login to Your Account
           </h2>
