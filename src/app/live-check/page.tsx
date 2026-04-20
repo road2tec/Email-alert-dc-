@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Webcam from "react-webcam";
 import { api, endpoints } from "@/lib/api";
-import { IconUser, IconScan, IconCheck, IconX } from "@tabler/icons-react";
+import { IconScan, IconCheck, IconX } from "@tabler/icons-react";
 
 export default function LiveCheckPage() {
     const webcamRef = useRef<Webcam>(null);
@@ -10,6 +10,7 @@ export default function LiveCheckPage() {
     const [lastCheckTime, setLastCheckTime] = useState(0);
     const [matchResult, setMatchResult] = useState<any>(null);
     const [errorMsg, setErrorMsg] = useState("");
+    const lastUnknownAlertTimeRef = useRef(0);
 
     const captureAndCheck = useCallback(async () => {
         if (!webcamRef.current || !isScanning) return;
@@ -34,15 +35,26 @@ export default function LiveCheckPage() {
                 if (res.data.message === "Unknown Student") {
                     setErrorMsg("Unknown Student");
                     // Show alert for unknown person
-                    if (now - lastCheckTime > 5000) { // Throttle alerts to every 5 seconds
+                    if (now - lastUnknownAlertTimeRef.current > 5000) { // Throttle alerts to every 5 seconds
+                        lastUnknownAlertTimeRef.current = now;
                         window.alert("⚠️ ALERT: Unknown Person Detected! Unauthorized access attempted.");
                     }
+                } else if (res.data.message) {
+                    // Show exact error from backend
+                    setErrorMsg(res.data.message);
                 } else {
                     setErrorMsg("");
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            if (err.response && err.response.data && err.response.data.detail) {
+                 setErrorMsg("Server Error: " + err.response.data.detail);
+            } else if (err.message === "Network Error") {
+                 setErrorMsg("Network Error: Backend Server Offline");
+            } else {
+                 setErrorMsg("Connection Error");
+            }
         }
     }, [isScanning, lastCheckTime]);
 
@@ -124,6 +136,11 @@ export default function LiveCheckPage() {
                                     </div>
                                     <h3 className="text-xl font-medium text-gray-400">Waiting for Face...</h3>
                                     <p className="text-xs text-gray-600 max-w-xs mx-auto">Please look directly at the camera for identification.</p>
+                                    {errorMsg && (
+                                        <p className="text-sm text-amber-400 max-w-xs mx-auto bg-amber-500/10 border border-amber-500/30 rounded-md px-3 py-2">
+                                            {errorMsg}
+                                        </p>
+                                    )}
                                 </>
                             )}
                         </div>

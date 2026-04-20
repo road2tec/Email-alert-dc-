@@ -45,7 +45,7 @@ def get_face_detector():
     if face_detection_model is None:
         print("[INFO] Initializing MediaPipe Face Detection (Tasks API)...")
         base_options = mp_python.BaseOptions(model_asset_path='backend/blaze_face_short_range.tflite')
-        options = vision.FaceDetectorOptions(base_options=base_options, min_detection_confidence=0.4)
+        options = vision.FaceDetectorOptions(base_options=base_options, min_detection_confidence=0.15)
         face_detection_model = vision.FaceDetector.create_from_options(options)
     return face_detection_model
 
@@ -133,13 +133,47 @@ def trigger_unknown_person_alert():
         last_unknown_alert_time = current_time
         threading.Thread(target=send_unknown_alert_email, daemon=True).start()
 
+def normalize_embedding(embedding):
+    """
+    Normalizes raw embedding output into a 1D float vector.
+    Returns None for invalid/empty vectors.
+    """
+    try:
+        if embedding is None:
+            return None
+        emb = np.asarray(embedding, dtype=np.float32).flatten()
+        if emb.size == 0 or not np.all(np.isfinite(emb)):
+            return None
+        return emb
+    except Exception:
+        return None
+
+def cosine_similarity(embedding_a, embedding_b):
+    """
+    Safe cosine similarity that returns None when vectors are incompatible.
+    """
+    emb_a = normalize_embedding(embedding_a)
+    emb_b = normalize_embedding(embedding_b)
+    if emb_a is None or emb_b is None:
+        return None
+    if emb_a.size != emb_b.size:
+        return None
+
+    norm_a = np.linalg.norm(emb_a)
+    norm_b = np.linalg.norm(emb_b)
+    if norm_a == 0 or norm_b == 0:
+        return None
+
+    return float(np.dot(emb_a, emb_b) / (norm_a * norm_b))
+
 def get_face_embedding(image, silent=False):
     """
     Detects face and returns a Histogram 'embedding' for comparison.
+    Returns (embedding, error_string)
     """
     if image is None:
         if not silent: print("[ERROR] No image provided to get_face_embedding")
-        return None
+        return None, "No Image Provided"
         
     height, width, _ = image.shape
     # if not silent: print(f"[DEBUG] Processing image: {width}x{height}")
@@ -152,7 +186,7 @@ def get_face_embedding(image, silent=False):
 
     if not results or not results.detections:
         if not silent: print(f"[WARNING] No face detected by MediaPipe in {width}x{height} image")
-        return None
+        return None, "MediaPipe: Face not detected. Need better lighting."
 
     if not silent: print(f"[INFO] Detected {len(results.detections)} face(s)")
 
@@ -166,16 +200,19 @@ def get_face_embedding(image, silent=False):
     y_end = min(height, y + h)
 
     face_crop = image[y_start:y_end, x_start:x_end]
-    if face_crop.size == 0: return None
+    if face_crop.size == 0: return None, "Cropped face is empty"
 
     from deepface import DeepFace
     try:
         # Get dense neural network embedding explicitly with Facenet
         embedding_obj = DeepFace.represent(img_path=face_crop, model_name="Facenet", detector_backend="skip", enforce_detection=False)[0]
-        return np.array(embedding_obj["embedding"], dtype=np.float32)
+        embedding = normalize_embedding(embedding_obj.get("embedding"))
+        if embedding is None:
+            return None, "Invalid embedding generated"
+        return embedding, None
     except Exception as e:
         if not silent: print(f"[ERROR] DeepFace embedding failed: {e}")
-        return None
+        return None, f"DeepFace Error: {str(e)}"
 
 def load_known_faces():
     global known_faces
@@ -190,36 +227,80 @@ def load_known_faces():
         for file_path in img_files:
             img = cv2.imread(file_path)
             if img is not None:
-                hist = get_face_embedding(img, silent=True)
-                if hist is not None:
+                emb, _ = get_face_embedding(img, silent=True)
+                emb = normalize_embedding(emb)
+                if emb is not None:
                     name = os.path.basename(os.path.dirname(file_path)) or os.path.splitext(os.path.basename(file_path))[0]
                     # Try to associate with database ID for attendance records
                     student_doc = students_collection.find_one({"name": name})
                     student_id = str(student_doc["_id"]) if student_doc else None
-                    known_faces.append({"id": student_id, "name": name, "embeddings": [hist.tolist()]})
+                    known_faces.append({"id": student_id, "name": name, "embeddings": [emb.tolist()]})
 
     # 2. Load from Database
     db_students = list(students_collection.find({"$or": [{"faceEmbedding": {"$exists": True}}, {"faceEmbeddings": {"$exists": True}}]}))
     for s in db_students:
         try:
+            embedding_candidates = []
+
             # New Multi-Sample Schema
-            if "faceEmbeddings" in s and isinstance(s["faceEmbeddings"], list):
-                for emb in s["faceEmbeddings"]:
-                    if len(emb) != 128: continue # Skip legacy histogram elements
-                    hist = np.array(emb, dtype=np.float32)
-                    known_faces.append({"id": str(s["_id"]), "name": s["name"], "hist": hist, "embeddings": [emb]})
-            
+            if isinstance(s.get("faceEmbeddings"), list):
+                embedding_candidates.extend(s["faceEmbeddings"])
+
             # Legacy Single-Sample Schema
-            elif "faceEmbedding" in s:
-                emb = s["faceEmbedding"]
-                if len(emb) != 128: continue
-                hist = np.array(emb, dtype=np.float32)
-                known_faces.append({"id": str(s["_id"]), "name": s["name"], "hist": hist, "embeddings": [emb]})
+            if s.get("faceEmbedding") is not None:
+                embedding_candidates.append(s["faceEmbedding"])
+
+            normalized_embeddings = []
+            for emb in embedding_candidates:
+                emb_vec = normalize_embedding(emb)
+                if emb_vec is None:
+                    continue
+                normalized_embeddings.append(emb_vec.tolist())
+
+            # Compatibility fallback: derive at least one embedding from stored profile image.
+            # This helps when legacy DB embeddings use a different dimension/model.
+            image_candidates = []
+            profile_image = s.get("profileImage")
+            if isinstance(profile_image, str) and profile_image.strip():
+                profile_filename = os.path.basename(profile_image)
+                if profile_filename:
+                    image_candidates.append(os.path.join(UPLOAD_DIR, profile_filename))
+                    image_candidates.append(os.path.join("uploads", profile_filename))
+
+            roll_no = str(s.get("rollNo", "")).strip()
+            if roll_no:
+                for ext in ("*.jpg", "*.jpeg", "*.png"):
+                    image_candidates.extend(glob.glob(os.path.join(UPLOAD_DIR, f"*{roll_no}*{ext[1:]}")))
+
+            for image_path in image_candidates:
+                if not os.path.exists(image_path):
+                    continue
+                profile_img = cv2.imread(image_path)
+                if profile_img is None:
+                    continue
+                profile_emb, _ = get_face_embedding(profile_img, silent=True)
+                profile_emb = normalize_embedding(profile_emb)
+                if profile_emb is not None:
+                    normalized_embeddings.append(profile_emb.tolist())
+                    break
+
+            if normalized_embeddings:
+                known_faces.append({
+                    "id": str(s["_id"]),
+                    "name": s.get("name", "Unknown"),
+                    "embeddings": normalized_embeddings,
+                })
         except Exception as e:
             print(f"[ERROR] Loading face for {s.get('name')}: {e}")
             continue
-            
-    print(f"[INFO] Total loaded reference faces: {len(known_faces)}")
+
+    embedding_dims = {}
+    for person in known_faces:
+        for emb in person.get("embeddings", []):
+            emb_len = len(emb) if isinstance(emb, list) else 0
+            embedding_dims[emb_len] = embedding_dims.get(emb_len, 0) + 1
+
+    print(f"[INFO] Total loaded reference faces: {len(known_faces)} | Embedding dimensions: {embedding_dims}")
 
 @app.get("/health")
 async def health():
@@ -252,7 +333,10 @@ class LoginRequest(BaseModel):
 @app.post("/admin/login")
 async def login(data: LoginRequest):
     # For demo, allow hardcoded or any existing db admin
-    if (data.email == "admin@dtu.ac.in" or data.email == "admin@vidya.com") and data.password == "Admin@123":
+    admin_email_env = os.getenv("ADMIN_EMAIL", "admin@sinhgad.edu")
+    admin_pass_env = os.getenv("ADMIN_PASSWORD", "Admin@123")
+    
+    if (data.email in ["admin@dtu.ac.in", "admin@vidya.com", admin_email_env]) and data.password == admin_pass_env:
         return {"user": {"name": "Administrator", "email": data.email, "role": "admin"}}
     
     admin = admin_collection.find_one({"email": data.email, "password": data.password})
@@ -401,9 +485,12 @@ async def add_student(student: StudentAddRequest):
             if img is None: continue
 
             # Generate Embedding
-            emb = get_face_embedding(img, silent=True)
+            emb, err = get_face_embedding(img, silent=False)
             if emb is not None:
-                embeddings.append(emb.flatten().tolist())
+                emb_vec = normalize_embedding(emb)
+                if emb_vec is None:
+                    continue
+                embeddings.append(emb_vec.tolist())
                 
                 # Save first valid image as profile picture
                 if not saved_profile_image:
@@ -500,32 +587,38 @@ async def recognize_face(data: AttendanceRequest):
         raise HTTPException(status_code=400, detail="No image")
 
     try:
+        if len(known_faces) == 0:
+            return {"status": "fail", "message": "No registered student faces loaded"}
+
         encoded = data.image.split(",", 1)[1] if "," in data.image else data.image
         np_arr = np.frombuffer(base64.b64decode(encoded), np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         if img is None: raise HTTPException(status_code=400, detail="Invalid Image")
 
-        target_emb = get_face_embedding(img, silent=True)
+        target_emb, err_msg = get_face_embedding(img, silent=True)
         if target_emb is None:
-             return {"status": "fail", "message": "No face detected"}
+             return {"status": "fail", "message": err_msg}
 
         best_score = 0
         best_match = None
+        comparison_count = 0
         
         for person in known_faces:
             local_best = 0
             for emb_list in person.get("embeddings", []):
-                stored_mat = np.array(emb_list, dtype=np.float32)
-                dot = np.dot(target_emb, stored_mat)
-                norm_a = np.linalg.norm(target_emb)
-                norm_b = np.linalg.norm(stored_mat)
-                score = dot / (norm_a * norm_b) if (norm_a * norm_b) != 0 else 0
+                score = cosine_similarity(target_emb, emb_list)
+                if score is None:
+                    continue
+                comparison_count += 1
                 if score > local_best: local_best = score
             
             if local_best > best_score:
                 best_score = local_best
                 best_match = person
+
+        if comparison_count == 0:
+            return {"status": "fail", "message": "Stored embeddings are incompatible. Re-register face samples."}
 
         if best_match and best_score > SIMILARITY_THRESHOLD:
             # Fetch full details to populate Live Check UI
@@ -577,12 +670,13 @@ async def mark_attendance(data: AttendanceRequest):
         
         # Get target embedding
         # We need a robust embedding. Re-using the utility function but ensuring it uses the cropped face
-        target_emb = get_face_embedding(img, silent=True)
+        target_emb, _ = get_face_embedding(img, silent=True)
         if target_emb is None:
              raise HTTPException(status_code=400, detail="Face quality too low")
 
         best_score = 0
         best_match_id = None
+        comparison_count = 0
         
         # known_faces stores: { "id": str(_id), "embeddings": [list...], "name": ... }
         for person in known_faces:
@@ -592,16 +686,18 @@ async def mark_attendance(data: AttendanceRequest):
             # New Multi-Embedding Check (Best of Max) using Cosine Similarity
             local_best = 0
             for emb_list in person_embeddings:
-                stored_mat = np.array(emb_list, dtype=np.float32)
-                dot = np.dot(target_emb, stored_mat)
-                norm_a = np.linalg.norm(target_emb)
-                norm_b = np.linalg.norm(stored_mat)
-                score = dot / (norm_a * norm_b) if (norm_a * norm_b) != 0 else 0
+                score = cosine_similarity(target_emb, emb_list)
+                if score is None:
+                    continue
+                comparison_count += 1
                 if score > local_best: local_best = score
             
             if local_best > best_score:
                 best_score = local_best
                 best_match_id = person.get("id")
+
+        if comparison_count == 0:
+            raise HTTPException(status_code=500, detail="Stored embeddings are incompatible. Re-register student face samples.")
 
         # detector_hq.close() not needed with singleton
         print(f"[FACE AUTH] Best Match ID: {best_match_id} | Score: {best_score:.4f} | Threshold: {SIMILARITY_THRESHOLD}")
